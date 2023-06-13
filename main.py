@@ -8,13 +8,13 @@ sending = threading.Event()
 rx_msg = []
 
 # lower priority
-msg1 = Message(
-    id=0x3C0,
+msg0 = Message(
+    id=0b1111000000,
     data=[1, 0, 0, 1, 3, 1, 4, 1], )
 
 # higher priority
-msg2 = Message(
-    id=0x2C,
+msg1 = Message(
+    id=0b101100,
     data=[2, 1, 0, 1, 3, 1, 4, 1], )
 
 
@@ -27,26 +27,27 @@ def get_min_value(id_list):
 
 
 def set_thread():
-    thread0 = threading.Thread(target=transmit, args=(msg1, 0))
-    thread1 = threading.Thread(target=transmit, args=(msg2, 1))
+    thread0 = threading.Thread(target=transmit, args=(msg0, 0))
+    thread1 = threading.Thread(target=transmit, args=(msg1, 1))
     thread0.start()
     thread1.start()
 
 
 def send(msg, thread_id):
     sending.set()
-    print(f"Thread #{thread_id} is sending {msg.id}\n")
+    print(f"Thread #{thread_id} is sending {bin(msg.id).replace('0b', '')}\n")
     rx_msg.append(msg)
-    arbitration_id.remove(msg.id)
+    arbitration_id.remove(bin(msg.id).replace('0b', ''))
     sending.clear()
-    print(f"Thread #{thread_id} sent {msg.id}\n")
+    print(f"Thread #{thread_id} sent {bin(msg.id).replace('0b', '')}\n")
     time.sleep(1.0)
     for i in rx_msg:
         print(i.id)
 
 
 def transmit(msg, thread_id: int) -> None:
-    arbitration_id.append(msg.id)
+    print(f"Thread #{thread_id} wants to transmit.")
+    arbitration_id.append(bin(msg.id).replace('0b', ''))
     if thread_id == 0:
         while not choosing.is_set():
             choosing.wait()
