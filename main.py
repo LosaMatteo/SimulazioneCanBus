@@ -2,6 +2,22 @@ import threading
 import time
 from Message import Message
 
+'''
+    Di seguito è riportato un esempio semplificato del protocollo di arbitraggio del CAN bus.
+    Per rappresentare due nodi della rete che vogliono trasmettere un messaggio nel bus contemporaneamente, 
+    abbiamo utilizzato dei thread che si contengono l'accesso ad una risorsa condivisa.
+    Questa risorsa condivisa è rappresentata dal metodo send() che permette ad un thread (nodo) di completare la
+    trasmissione del messaggio.
+    Per permettere ad un nodo di leggere i messaggi trasmessi degli altri nodi, si è utilizzata la lista arbitration_id
+    contenente gli id dei messaggi che devono essere trasmessi nel bus.
+    Questa lista verrà passata come argomento al metodo arbitration() che contiene la logica dell'arbitraggio.
+    In particolare, nel metodo compare(), viene mostrato il confronto bit a bit effettuato da un nodo tra l'id del
+    messaggio trasmesso e quello ricevuto da un altro nodo, fermandosi quando un suo bit recessivo (1) viene sovrascritto
+    da un bit dominante (0) e mettendosi in stato di attesa finché l'altro nodo non rilascia la risorsa condivisa.
+    NOTA: Questo esempio semplificato, per ora, prevede l'esistenza di due soli nodi che vogliono trasmettere
+    contemporaneamente.
+'''
+
 arbitration_id = []  # contiene gli arbitration id dei messaggi
 sending = threading.Event()  # evento che garantisce la trasmissione esclusiva nel bus
 rx_msg = []  # contiene i messaggi che sono stati inviati
